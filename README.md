@@ -2,34 +2,32 @@
 
 Real-time attendance tracking using facial recognition with webcam streaming.
 
-## Features
-
+## Current Features
 - **Real-time face detection** from webcam feed
 - **Face recognition** to identify enrolled people
-- **Entry/exit tracking** with debounced state machine
 - **Web UI** showing present vs absent people
 - **Photo enrollment** to register new people
 
+## Planned Features
+- **Persistent attendance record** showing an attendance records over a range of dates
+
 ## Tech Stack
 
-- **Backend**: FastAPI, face_recognition, OpenCV, SQLAlchemy
+- **Backend**: FastAPI, face_recognition, OpenCV, SQLAlchemy, YuNet (WIP)
 - **Frontend**: React, TypeScript
 - **Database**: PostgreSQL
 - **Streaming**: WebSocket with base64 JPEG frames
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.11
 - Node.js 18+
 - Docker (for PostgreSQL)
 - Webcam
 
 ### Windows-specific: Installing dlib
 
-The `face_recognition` library requires `dlib`. On Windows, you may need:
-
-1. Install Visual Studio Build Tools with C++ workload
-2. Or use conda: `conda install -c conda-forge dlib`
+The `face_recognition` library requires `dlib`. 
 
 ## Setup
 
@@ -45,7 +43,7 @@ docker-compose up -d
 cd backend
 
 # Create virtual environment
-python -m venv venv
+py -3.11 -m venv venv
 
 # Activate (Windows)
 venv\Scripts\activate
@@ -91,31 +89,3 @@ npm start
 | GET | `/api/attendance/current` | Get present/absent status |
 | GET | `/api/attendance/history` | Get attendance event log |
 | WS | `/ws/stream` | Real-time video stream |
-
-## Configuration
-
-Environment variables in `backend/.env`:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| DATABASE_URL | postgresql://postgres:postgres@localhost:5432/attendance | Database connection |
-| FACE_RECOGNITION_TOLERANCE | 0.6 | Face matching threshold (lower = stricter) |
-| ENTRY_FRAME_THRESHOLD | 5 | Frames to confirm entry |
-| EXIT_FRAME_THRESHOLD | 10 | Frames to confirm exit |
-| PROCESSING_FPS | 10 | Frame processing rate |
-
-## Architecture
-
-```
-[Webcam] -> [OpenCV Capture] -> [Face Detection] -> [Face Recognition]
-    -> [Presence Tracker] -> [WebSocket] -> [React Frontend]
-                          -> [PostgreSQL]
-```
-
-### Entry/Exit Detection
-
-Uses a debounced state machine:
-- **Entry**: Person detected for 5 consecutive frames (~0.5s)
-- **Exit**: Person not detected for 10 consecutive frames (~1.0s)
-
-This prevents false triggers from momentary detection failures.
